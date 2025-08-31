@@ -9,7 +9,6 @@ def get_ffmpeg_path():
         exe_path = os.path.join(base, name)
         if os.path.exists(exe_path):
             return exe_path
-    # Spróbuj w folderze nadrzędnym
     for name in exe_names:
         exe_path = os.path.join(os.path.dirname(base), name)
         if os.path.exists(exe_path):
@@ -17,19 +16,16 @@ def get_ffmpeg_path():
     return None
 
 def get_ytdlp_path():
-    # Szukaj yt-dlp.exe lub yt-dlp_x86.exe w folderze aplikacji (działa też po spakowaniu do .exe)
     base = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
     exe_names = ['yt-dlp.exe', 'yt-dlp_x86.exe']
     for name in exe_names:
         exe_path = os.path.join(base, name)
         if os.path.exists(exe_path):
             return exe_path
-    # Spróbuj w folderze nadrzędnym
     for name in exe_names:
         exe_path = os.path.join(os.path.dirname(base), name)
         if os.path.exists(exe_path):
             return exe_path
-    raise FileNotFoundError('yt-dlp.exe or yt-dlp_x86.exe not found!')
 
 class Downloader:
     @staticmethod

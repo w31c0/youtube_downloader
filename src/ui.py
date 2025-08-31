@@ -10,12 +10,11 @@ import tkinter.messagebox as messagebox
 import tkinter.filedialog as filedialog
 
 GITHUB_API_URL = "https://api.github.com/repos/w31c0/youtube_downloader/releases/latest"
-LOCAL_VERSION = "1.0.0"
+LOCAL_VERSION = "0.0.1"
 
 class YouTubeDownloaderUI:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.withdraw()  # Hide window while setting icon
         self.root.title("YouTube Downloader")
         self.root.geometry("400x200")
         import sys, os
