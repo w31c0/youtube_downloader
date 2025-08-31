@@ -1,0 +1,4 @@
+# Ignoruj foldery build i dist
+build/
+dist/
+*.spec
