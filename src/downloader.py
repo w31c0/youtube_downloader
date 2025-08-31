@@ -31,9 +31,11 @@ def get_ytdlp_path():
 class Downloader:
     @staticmethod
     def download_video(url, path):
+        if not os.path.isdir(path):
+            raise Exception("Invalid destination folder.")
         ytdlp = get_ytdlp_path()
         if not ytdlp:
-            raise Exception("yt-dlp executable not found.")
+            raise Exception("yt-dlp executable not found. Please include yt-dlp.exe in the application directory.")
         ffmpeg = get_ffmpeg_path()
         cmd = [
             ytdlp,
@@ -45,14 +47,19 @@ class Downloader:
             cmd += ['--ffmpeg-location', os.path.dirname(ffmpeg)]
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
-            raise Exception(result.stderr)
-        return 'Downloaded to folder: ' + path
+            error_msg = result.stderr.strip()
+            if "Unable to download webpage" in error_msg:
+                raise Exception("Invalid or inaccessible YouTube URL.")
+            raise Exception(f"Download failed: {error_msg}")
+        return 'Video downloaded to folder: ' + path
 
     @staticmethod
     def download_audio(url, path):
+        if not os.path.isdir(path):
+            raise Exception("Invalid destination folder.")
         ytdlp = get_ytdlp_path()
         if not ytdlp:
-            raise Exception("yt-dlp executable not found.")
+            raise Exception("yt-dlp executable not found. Please include yt-dlp.exe in the application directory.")
         ffmpeg = get_ffmpeg_path()
         cmd = [
             ytdlp,
@@ -66,5 +73,8 @@ class Downloader:
             cmd += ['--ffmpeg-location', os.path.dirname(ffmpeg)]
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
-            raise Exception(result.stderr)
-        return 'Downloaded to folder: ' + path
+            error_msg = result.stderr.strip()
+            if "Unable to download webpage" in error_msg:
+                raise Exception("Invalid or inaccessible YouTube URL.")
+            raise Exception(f"Download failed: {error_msg}")
+        return 'Audio downloaded to folder: ' + path

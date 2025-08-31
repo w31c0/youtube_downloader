@@ -1,5 +1,3 @@
-
-
 import urllib.request
 import json
 import webbrowser
@@ -10,7 +8,7 @@ import tkinter.messagebox as messagebox
 import tkinter.filedialog as filedialog
 
 GITHUB_API_URL = "https://api.github.com/repos/w31c0/youtube_downloader/releases/latest"
-LOCAL_VERSION = "0.0.1"
+LOCAL_VERSION = "0.0.2"
 
 class YouTubeDownloaderUI:
     def __init__(self):
@@ -18,7 +16,7 @@ class YouTubeDownloaderUI:
         self.root.title("YouTube Downloader")
         self.root.geometry("400x200")
         import sys, os
-        if hasattr(sys, '_MEIPASS'):
+        if getattr(sys, '_MEIPASS', False):
             icon_path = os.path.join(sys._MEIPASS, "icon.ico")
         else:
             icon_path = os.path.join(os.path.dirname(__file__), "icon.ico")
@@ -26,7 +24,7 @@ class YouTubeDownloaderUI:
             self.root.iconbitmap(default=icon_path)
         except Exception as e:
             print(f"Failed to set window icon: {e}")
-        self.root.deiconify()  # Show window after setting icon
+        self.root.deiconify()
         self.check_for_update()
         self.url_label = tk.Label(self.root, text="Paste YouTube link:")
         self.url_label.pack(pady=5)
@@ -47,7 +45,8 @@ class YouTubeDownloaderUI:
 
     def check_for_update(self):
         try:
-            with urllib.request.urlopen(GITHUB_API_URL, timeout=5) as response:
+            req = urllib.request.Request(GITHUB_API_URL, headers={'User-Agent': 'YouTubeDownloader/0.0.1'})
+            with urllib.request.urlopen(req, timeout=5) as response:
                 data = json.loads(response.read().decode())
                 latest_version = data["tag_name"].lstrip("v")
                 if latest_version != LOCAL_VERSION:
@@ -55,16 +54,24 @@ class YouTubeDownloaderUI:
                     msg = f"A new version is available: {latest_version}.\n\nYou can download it from:\n{release_url}"
                     if messagebox.askyesno("Update available", msg + "\n\nDo you want to open the page?"):
                         webbrowser.open(release_url)
-        except Exception:
-            pass
+        except urllib.error.URLError as e:
+            print(f"Network error during update check: {e}")
+        except json.JSONDecodeError as e:
+            print(f"Error decoding GitHub API response: {e}")
+        except Exception as e:
+            print(f"Unexpected error during update check: {e}")
 
     def choose_path(self):
         path = filedialog.askdirectory()
         if path:
             self.save_path = path
             self.path_label.config(text=path)
+
     def download(self):
-        url = self.url_entry.get()
+        url = self.url_entry.get().strip()
+        if not url.startswith(('http://', 'https://')):
+            messagebox.showerror("Error", "Please enter a valid YouTube link!")
+            return
         fmt = self.format_var.get()
         path = self.save_path
         if not url or not path:
@@ -77,8 +84,11 @@ class YouTubeDownloaderUI:
                 msg = Downloader.download_audio(url, path)
             messagebox.showinfo("Success", msg)
         except Exception as e:
-            messagebox.showerror("Error", str(e))
+            messagebox.showerror("Error", f"Download failed: {str(e)}")
 
     def run(self):
         self.root.mainloop()
 
+if __name__ == "__main__":
+    app = YouTubeDownloaderUI()
+    app.run()
