@@ -29,7 +29,7 @@ def get_ytdlp_path():
         exe_path = os.path.join(os.path.dirname(base), name)
         if os.path.exists(exe_path):
             return exe_path
-    raise FileNotFoundError('Nie znaleziono yt-dlp.exe ani yt-dlp_x86.exe!')
+    raise FileNotFoundError('yt-dlp.exe or yt-dlp_x86.exe not found!')
 
 class Downloader:
     @staticmethod
@@ -47,7 +47,7 @@ class Downloader:
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
             raise Exception(result.stderr)
-        return 'Pobrano do folderu: ' + path
+        return 'Downloaded to folder: ' + path
 
     @staticmethod
     def download_audio(url, path):
@@ -66,4 +66,4 @@ class Downloader:
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
             raise Exception(result.stderr)
-        return 'Pobrano do folderu: ' + path
+        return 'Downloaded to folder: ' + path
