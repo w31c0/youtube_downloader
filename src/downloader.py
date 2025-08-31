@@ -26,11 +26,14 @@ def get_ytdlp_path():
         exe_path = os.path.join(os.path.dirname(base), name)
         if os.path.exists(exe_path):
             return exe_path
+    return None
 
 class Downloader:
     @staticmethod
     def download_video(url, path):
         ytdlp = get_ytdlp_path()
+        if not ytdlp:
+            raise Exception("yt-dlp executable not found.")
         ffmpeg = get_ffmpeg_path()
         cmd = [
             ytdlp,
@@ -48,6 +51,8 @@ class Downloader:
     @staticmethod
     def download_audio(url, path):
         ytdlp = get_ytdlp_path()
+        if not ytdlp:
+            raise Exception("yt-dlp executable not found.")
         ffmpeg = get_ffmpeg_path()
         cmd = [
             ytdlp,
