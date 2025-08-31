@@ -10,7 +10,7 @@ import tkinter.messagebox as messagebox
 import tkinter.filedialog as filedialog
 
 GITHUB_API_URL = "https://api.github.com/repos/w31c0/youtube_downloader/releases/latest"
-LOCAL_VERSION = "0.0.2"
+LOCAL_VERSION = "0.0.1"
 
 class YouTubeDownloaderUI:
     def __init__(self):
