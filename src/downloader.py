@@ -1,6 +1,8 @@
 import subprocess
 import os
 import sys
+import re
+import threading
 
 def get_ffmpeg_path():
     base = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
@@ -30,7 +32,50 @@ def get_ytdlp_path():
 
 class Downloader:
     @staticmethod
-    def download_video(url, path):
+    def _run_with_progress(cmd, progress_callback=None):
+        """Run yt-dlp command and parse progress output"""
+        process = subprocess.Popen(
+            cmd, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.STDOUT, 
+            text=True, 
+            universal_newlines=True,
+            bufsize=1
+        )
+        
+        output_lines = []
+        
+        for line in iter(process.stdout.readline, ''):
+            output_lines.append(line)
+            
+            if progress_callback:
+                # Parse yt-dlp progress output
+                if '[download]' in line and '%' in line:
+                    # Extract percentage from lines like "[download]  45.2% of 123.45MiB at 1.23MiB/s ETA 00:30"
+                    match = re.search(r'\[download\]\s+(\d+\.?\d*)%', line)
+                    if match:
+                        percentage = float(match.group(1))
+                        progress_callback(percentage)
+                elif 'Merging formats into' in line:
+                    progress_callback(95)  # Near completion when merging
+                elif 'Deleting original file' in line:
+                    progress_callback(98)  # Almost done
+        
+        process.wait()
+        
+        if process.returncode != 0:
+            error_output = ''.join(output_lines)
+            if "Unable to download webpage" in error_output:
+                raise Exception("Invalid or inaccessible YouTube URL.")
+            raise Exception(f"Download failed: {error_output}")
+        
+        if progress_callback:
+            progress_callback(100)  # Complete
+        
+        return ''.join(output_lines)
+
+    @staticmethod
+    def download_video(url, path, progress_callback=None):
         if not os.path.isdir(path):
             raise Exception("Invalid destination folder.")
         ytdlp = get_ytdlp_path()
@@ -45,16 +90,12 @@ class Downloader:
         ]
         if ffmpeg:
             cmd += ['--ffmpeg-location', os.path.dirname(ffmpeg)]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode != 0:
-            error_msg = result.stderr.strip()
-            if "Unable to download webpage" in error_msg:
-                raise Exception("Invalid or inaccessible YouTube URL.")
-            raise Exception(f"Download failed: {error_msg}")
+        
+        Downloader._run_with_progress(cmd, progress_callback)
         return 'Video downloaded to folder: ' + path
 
     @staticmethod
-    def download_audio(url, path):
+    def download_audio(url, path, progress_callback=None):
         if not os.path.isdir(path):
             raise Exception("Invalid destination folder.")
         ytdlp = get_ytdlp_path()
@@ -71,10 +112,6 @@ class Downloader:
         ]
         if ffmpeg:
             cmd += ['--ffmpeg-location', os.path.dirname(ffmpeg)]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode != 0:
-            error_msg = result.stderr.strip()
-            if "Unable to download webpage" in error_msg:
-                raise Exception("Invalid or inaccessible YouTube URL.")
-            raise Exception(f"Download failed: {error_msg}")
+        
+        Downloader._run_with_progress(cmd, progress_callback)
         return 'Audio downloaded to folder: ' + path
