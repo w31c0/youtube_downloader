@@ -33,10 +33,8 @@ def get_ytdlp_path():
 class Downloader:
     @staticmethod
     def _run_with_progress(cmd, progress_callback=None):
-        """Run yt-dlp command and parse progress output"""
-        # Hide console window on Windows
         startupinfo = None
-        if os.name == 'nt':  # Windows
+        if os.name == 'nt':
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             startupinfo.wShowWindow = subprocess.SW_HIDE
@@ -57,17 +55,15 @@ class Downloader:
             output_lines.append(line)
             
             if progress_callback:
-                # Parse yt-dlp progress output
                 if '[download]' in line and '%' in line:
-                    # Extract percentage from lines like "[download]  45.2% of 123.45MiB at 1.23MiB/s ETA 00:30"
                     match = re.search(r'\[download\]\s+(\d+\.?\d*)%', line)
                     if match:
                         percentage = float(match.group(1))
                         progress_callback(percentage)
                 elif 'Merging formats into' in line:
-                    progress_callback(95)  # Near completion when merging
+                    progress_callback(95)
                 elif 'Deleting original file' in line:
-                    progress_callback(98)  # Almost done
+                    progress_callback(98)
         
         process.wait()
         
@@ -78,7 +74,7 @@ class Downloader:
             raise Exception(f"Download failed: {error_output}")
         
         if progress_callback:
-            progress_callback(100)  # Complete
+            progress_callback(100)
         
         return ''.join(output_lines)
 
