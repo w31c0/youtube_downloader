@@ -34,13 +34,21 @@ class Downloader:
     @staticmethod
     def _run_with_progress(cmd, progress_callback=None):
         """Run yt-dlp command and parse progress output"""
+        # Hide console window on Windows
+        startupinfo = None
+        if os.name == 'nt':  # Windows
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
+        
         process = subprocess.Popen(
             cmd, 
             stdout=subprocess.PIPE, 
             stderr=subprocess.STDOUT, 
             text=True, 
             universal_newlines=True,
-            bufsize=1
+            bufsize=1,
+            startupinfo=startupinfo
         )
         
         output_lines = []
