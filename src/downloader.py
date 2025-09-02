@@ -31,6 +31,18 @@ def get_ytdlp_path():
     return None
 
 class Downloader:
+    _current_process = None
+    _cancel_requested = False
+    
+    @staticmethod
+    def cancel_download():
+        Downloader._cancel_requested = True
+        if Downloader._current_process:
+            try:
+                Downloader._current_process.terminate()
+            except:
+                pass
+    
     @staticmethod
     def _run_with_progress(cmd, progress_callback=None):
         startupinfo = None
@@ -39,6 +51,7 @@ class Downloader:
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             startupinfo.wShowWindow = subprocess.SW_HIDE
         
+        Downloader._cancel_requested = False
         process = subprocess.Popen(
             cmd, 
             stdout=subprocess.PIPE, 
@@ -48,10 +61,15 @@ class Downloader:
             bufsize=1,
             startupinfo=startupinfo
         )
+        Downloader._current_process = process
         
         output_lines = []
         
         for line in iter(process.stdout.readline, ''):
+            if Downloader._cancel_requested:
+                process.terminate()
+                break
+                
             output_lines.append(line)
             
             if progress_callback:
@@ -66,6 +84,10 @@ class Downloader:
                     progress_callback(98)
         
         process.wait()
+        Downloader._current_process = None
+        
+        if Downloader._cancel_requested:
+            raise Exception("Download cancelled by user.")
         
         if process.returncode != 0:
             error_output = ''.join(output_lines)
