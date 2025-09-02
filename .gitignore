@@ -6,3 +6,4 @@ icon.ico
 ffmpeg.exe
 ffprobe.exe
 yt-dlp_x86.exe
+__pycache__/
