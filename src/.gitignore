@@ -1,0 +1,7 @@
+build/
+dist/
+*.spec
+icon.ico
+ffmpeg.exe
+ffprobe.exe
+yt-dlp_x86.exe
