@@ -10,7 +10,7 @@ import tkinter.ttk as ttk
 import threading
 
 GITHUB_API_URL = "https://api.github.com/repos/w31c0/youtube_downloader/releases/latest"
-LOCAL_VERSION = "1.0.1"
+LOCAL_VERSION = "1.0.2"
 
 class YouTubeDownloaderUI:
     def __init__(self):
@@ -249,10 +249,12 @@ class YouTubeDownloaderUI:
         self.path_label.pack(anchor='w', padx=20, pady=(0, 15))
         download_container = tk.Frame(main_frame, bg=self.colors['bg'])
         download_container.pack(fill='x', pady=(5, 8))
+
+        buttons_frame = tk.Frame(download_container, bg=self.colors['bg'])
+        buttons_frame.pack(fill='x', padx=2, pady=2)
         
-        # Download button
-        download_glow_frame = tk.Frame(download_container, bg=self.colors['accent'], relief='flat')
-        download_glow_frame.pack(padx=2, pady=2)
+        download_glow_frame = tk.Frame(buttons_frame, bg=self.colors['accent'], relief='flat')
+        download_glow_frame.pack(side='left', fill='x', expand=True, padx=(0, 5))
         
         self.download_button = tk.Button(
             download_glow_frame, 
@@ -263,7 +265,7 @@ class YouTubeDownloaderUI:
             fg='white',
             relief='flat',
             bd=0,
-            padx=60,
+            padx=40,
             pady=20,
             cursor='hand2',
             activebackground=self.colors['accent_hover'],
@@ -271,25 +273,24 @@ class YouTubeDownloaderUI:
         )
         self.download_button.pack(fill='x')
         
-        # Cancel button (initially hidden)
-        cancel_glow_frame = tk.Frame(download_container, bg=self.colors['text_muted'], relief='flat')
+        self.cancel_glow_frame = tk.Frame(buttons_frame, bg='#404040', relief='flat')
+        self.cancel_glow_frame.pack(side='right', padx=(5, 0))
         
         self.cancel_button = tk.Button(
-            cancel_glow_frame, 
-            text="❌ CANCEL DOWNLOAD", 
+            self.cancel_glow_frame, 
+            text="❌ CANCEL", 
             command=self.cancel_download,
             font=('Segoe UI', 12, 'bold'),
-            bg=self.colors['text_muted'],
-            fg='white',
+            bg='#404040',
+            fg='#888888',
             relief='flat',
             bd=0,
-            padx=40,
-            pady=12,
-            cursor='hand2',
-            activebackground='#888888',
-            activeforeground='white'
+            padx=25,
+            pady=20,
+            cursor='arrow',
+            state='disabled'
         )
-        self.cancel_glow_frame = cancel_glow_frame
+        self.cancel_button.pack()
         self.progress_frame = tk.Frame(main_frame, bg=self.colors['bg'])
         self.progress_frame.pack(fill='x', pady=(0, 10), side='bottom')
         
@@ -323,7 +324,6 @@ class YouTubeDownloaderUI:
         self.progress_bar.pack(fill='x', padx=10, pady=10)
         self.bind_hover_effects()
         
-        # Initial responsive update
         self.root.after(100, self._update_responsive_layout)
     
     def on_url_focus_in(self, event):
@@ -354,10 +354,12 @@ class YouTubeDownloaderUI:
         def on_enter_cancel(e):
             if self.downloading:
                 self.cancel_button.config(bg='#888888')
+                self.cancel_glow_frame.config(bg='#888888')
         
         def on_leave_cancel(e):
             if self.downloading:
                 self.cancel_button.config(bg=self.colors['text_muted'])
+                self.cancel_glow_frame.config(bg=self.colors['text_muted'])
         
         self.download_button.bind("<Enter>", on_enter_download)
         self.download_button.bind("<Leave>", on_leave_download)
@@ -415,7 +417,7 @@ class YouTubeDownloaderUI:
     def _download_complete(self, msg):
         self.downloading = False
         self.download_button.config(text="⚡ DOWNLOAD NOW", state="normal")
-        self._hide_cancel_button()
+        self._disable_cancel_button()
         self.progress_label.config(text="Download completed!")
         messagebox.showinfo("Success", msg)
         self.root.after(3000, self._reset_progress)
@@ -423,7 +425,7 @@ class YouTubeDownloaderUI:
     def _download_error(self, error_msg):
         self.downloading = False
         self.download_button.config(text="⚡ DOWNLOAD NOW", state="normal")
-        self._hide_cancel_button()
+        self._disable_cancel_button()
         self.progress_label.config(text="Download failed!")
         self.progress_bar['value'] = 0
         messagebox.showerror("Error", f"Download failed: {error_msg}")
@@ -431,7 +433,7 @@ class YouTubeDownloaderUI:
     def _download_cancelled(self):
         self.downloading = False
         self.download_button.config(text="⚡ DOWNLOAD NOW", state="normal")
-        self._hide_cancel_button()
+        self._disable_cancel_button()
         self.progress_label.config(text="Download cancelled!")
         self.progress_bar['value'] = 0
         messagebox.showinfo("Cancelled", "Download was cancelled by user.")
@@ -458,7 +460,7 @@ class YouTubeDownloaderUI:
         
         self.downloading = True
         self.download_button.config(text="Downloading...", state="disabled")
-        self._show_cancel_button()
+        self._enable_cancel_button()
         self.progress_label.config(text="Starting download...")
         self.progress_bar['value'] = 0
         
@@ -473,12 +475,23 @@ class YouTubeDownloaderUI:
         if self.downloading:
             Downloader.cancel_download()
     
-    def _show_cancel_button(self):
-        self.cancel_glow_frame.pack(padx=2, pady=(8, 2))
-        self.cancel_button.pack(fill='x')
+    def _enable_cancel_button(self):
+        self.cancel_button.config(
+            state='normal',
+            bg=self.colors['text_muted'],
+            fg='white',
+            cursor='hand2'
+        )
+        self.cancel_glow_frame.config(bg=self.colors['text_muted'])
     
-    def _hide_cancel_button(self):
-        self.cancel_glow_frame.pack_forget()
+    def _disable_cancel_button(self):
+        self.cancel_button.config(
+            state='disabled',
+            bg='#404040',
+            fg='#888888',
+            cursor='arrow'
+        )
+        self.cancel_glow_frame.config(bg='#404040')
     
     def _on_window_resize(self, event):
         if event.widget == self.root:
