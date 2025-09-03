@@ -1,5 +1,6 @@
 # YouTube Downloader
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Release](https://img.shields.io/github/v/release/w31c0/youtube_downloader?label=Release)](https://github.com/w31c0/youtube_downloader/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/w31c0/youtube_downloader?label=Stars)](https://github.com/w31c0/youtube_downloader/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/w31c0/youtube_downloader?label=Issues)](https://github.com/w31c0/youtube_downloader/issues)
