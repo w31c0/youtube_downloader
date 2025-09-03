@@ -30,7 +30,7 @@ To get started, download the latest version of the application:
 Follow these steps to download videos or audio:
 
 1. **Launch the Application**:
-   - Double-click `youtube_downloader.exe` to start the program.
+   - Double-click `WYTD.exe` to start the program.
    - If Windows Defender prompts, click _More info_ and select _Run anyway_.
 
 2. **Download Content**:
