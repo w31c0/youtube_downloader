@@ -10,7 +10,7 @@ import tkinter.ttk as ttk
 import threading
 
 GITHUB_API_URL = "https://api.github.com/repos/w31c0/youtube_downloader/releases/latest"
-LOCAL_VERSION = "1.0.3"
+LOCAL_VERSION = "1.0.3-beta"
 
 class YouTubeDownloaderUI:
     def __init__(self):
